@@ -19,7 +19,7 @@ jobs:
           xcodebuild build-for-testing \
             -project TodoList.xcodeproj \
             -scheme TodoList \
-            -destination 'platform=IOS Simulator,name=iPhone 17, OS=26.5' \
+            -destination 'platform=IOS Simulator,name=iPhone 17,OS=26.5' \
             CODE_SIGNING_ALLOWED=NO
       - name: Run Unit Tests
         run: |
