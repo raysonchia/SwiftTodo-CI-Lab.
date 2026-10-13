@@ -1,0 +1,60 @@
+name: Swift CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: 
+
+jobs:
+  build-test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Build Application for testing
+        run: |
+          xcodebuild build-for-testing \
+            -project TodoList.xcodeproj \
+            -scheme TodoList \
+            -destination 'platform=IOS Simulator,name=iPhone 17, OS=26.5' \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Run Unit Tests
+        run: |
+          xcodebuild test-without-building \
+            -project TodoList.xcodeproj \
+            -scheme TodoList \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' \
+            CODE_SIGNING_ALLOWED=NO
+            
+  security-scan:
+    name: CodeQL Security Scan
+    runs-on: macos-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: swift
+          build-mode: manual
+
+      - name: Build App for CodeQL Analysis
+        run: |
+          xcodebuild build \
+            -project TodoList.xcodeproj \
+            -scheme TodoList \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
